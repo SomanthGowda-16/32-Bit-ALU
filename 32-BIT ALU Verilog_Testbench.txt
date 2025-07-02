@@ -1,0 +1,87 @@
+vALU32 BIT TESTBENCH
+
+
+
+module ALU32_tb;
+
+    // Inputs
+    reg [31:0] A;
+    reg [31:0] B;
+    reg [2:0] ALU_Sel;
+    reg clk;
+    reg rst;
+
+    // Outputs
+    wire [31:0] ALU_Out;
+    wire Zero;
+
+    // Instantiate the Unit Under Test (UUT)
+    ALU32 uut (
+        .A(A),
+        .B(B),
+        .ALU_Sel(ALU_Sel),
+        .clk(clk),
+        .rst(rst),
+        .ALU_Out(ALU_Out),
+        .Zero(Zero)
+    );
+
+    // Clock generation: 10ns period
+    always #5 clk = ~clk;
+
+    initial begin
+        // Initial values
+        clk = 0;
+        rst = 1;
+        A = 0;
+        B = 0;
+        ALU_Sel = 0;
+
+        // Hold reset for one clock cycle
+        #10 rst = 0;
+
+        // Test AND
+        A = 32'hFFFF0000; B = 32'h0F0F0F0F; ALU_Sel = 3'b000;
+        #10 $display("AND: %h & %h = %h, Zero = %b", A, B, ALU_Out, Zero);
+
+        // Test OR
+        A = 32'h12345678; B = 32'h87654321; ALU_Sel = 3'b001;
+        #10 $display("OR : %h | %h = %h, Zero = %b", A, B, ALU_Out, Zero);
+
+        // Test ADD
+        A = 32'd10; B = 32'd25; ALU_Sel = 3'b010;
+        #10 $display("ADD: %d + %d = %d, Zero = %b", A, B, ALU_Out, Zero);
+
+        // Test SUB
+        A = 32'd100; B = 32'd50; ALU_Sel = 3'b011;
+        #10 $display("SUB: %d - %d = %d, Zero = %b", A, B, ALU_Out, Zero);
+
+        // Test XOR
+        A = 32'hA5A5A5A5; B = 32'h5A5A5A5A; ALU_Sel = 3'b100;
+        #10 $display("XOR: %h ^ %h = %h, Zero = %b", A, B, ALU_Out, Zero);
+
+        // Test NOR
+        A = 32'hFFFFFFFF; B = 32'h00000000; ALU_Sel = 3'b101;
+        #10 $display("NOR: ~( %h | %h ) = %h, Zero = %b", A, B, ALU_Out, Zero);
+
+        // Test Logical Shift Left
+        A = 32'h00000001; B = 32'd4; ALU_Sel = 3'b110;
+        #10 $display("LSL : %h << %d = %h, Zero = %b", A, B[4:0], ALU_Out, Zero);
+
+        // Test Logical Shift Right
+        A = 32'h80000000; B = 32'd3; ALU_Sel = 3'b111;
+        #10 $display("LSR : %h >> %d = %h, Zero = %b", A, B[4:0], ALU_Out, Zero);
+
+        // Test Zero flag
+        A = 32'd25; B = 32'd25; ALU_Sel = 3'b011;
+        #10 $display("SUB(Z): %d - %d = %d, Zero = %b", A, B, ALU_Out, Zero);
+
+        // Apply reset again
+        rst = 1;
+        #10 rst = 0;
+        #10 $display("After reset: ALU_Out = %h, Zero = %b", ALU_Out, Zero);
+
+        $finish;
+    end
+
+endmodule
